@@ -11,9 +11,7 @@ const router = express.Router();
 const app = express();
 const redis = require("redis");
 const options = require("./config");
-const client = redis.createClient(options.RDS_PORT,options.RDS_HOST,options.RDS_OPTS);
-const pub = redis.createClient(options.RDS_PORT,options.RDS_HOST,options.RDS_OPTS);
-const sub = redis.createClient(options.RDS_PORT,options.RDS_HOST,options.RDS_OPTS);
+const redisclient = redis.createClient(options.RDS_PORT,options.RDS_HOST,options.RDS_OPTS);
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 //logs info to server
@@ -66,32 +64,19 @@ app.use(function(err, req, res, next) {
 		"msg": '服务异常'
 	});
 });
-//写入redis
-app.use("/commit",function(req,res,next){
-	console.log("sdfasdfasfasdfsdfsdfsdfsadfasdfasdfasfasdfsad");
-	var commits = JSON.stringify(req.query.data);
-	var name    = req.query.data.name;
-	client.set("bidinvest",commits,redis.print);
-	//订阅commits
-	sub.subscribe("commits");
-})
-//触发订阅
-sub.on("subscribe", function (channel, count) {
-	console.log("channel",channel);
-	console.log("count",count);
-	//取出redis存储的数据
-	client.get("bidinvest", function(err, reply) {
-	    pub.publish("commits", reply);
-	});
-});
 
-sub.on("message", function (channel, message) {
-    console.log("sub channel " + channel + ": " + message);
+redisclient.on('connect',function(){
+ console.log("redis connect success");
+ //订阅频道chatchannel
+ redisclient.subscribe("chatchannel");
 });
-io.on('connection', function (socket) {
-	 socket.emit('news', { hello: "message" });
-	console.log("connection success");
-});
+//socketIo connection
+io.on('connection', function(socket) {
+	redisclient.on('message', function(error, msg) {
+        console.log('socketIo connection');
+        socket.emit('msgReceived', msg);        
+    });
+})
 module.exports = app;
 
 server.listen(3000,function(){

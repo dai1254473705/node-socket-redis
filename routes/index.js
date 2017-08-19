@@ -10,8 +10,6 @@ const app = express();
 const redis = require("redis");
 const options = require("../config");
 const redisclient  = redis.createClient(options.RDS_PORT,options.RDS_HOST,options.RDS_OPTS);
-const pub = redis.createClient(options.RDS_PORT,options.RDS_HOST,options.RDS_OPTS);
-const sub = redis.createClient(options.RDS_PORT,options.RDS_HOST,options.RDS_OPTS);
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
@@ -29,14 +27,13 @@ router.all('/', function(req, res, next) {
 		author:"DIEW"
 	});
 })
-//client.auth(options.RDS_PWD,function(){   
-//      console.log('通过认证');   
-//}); 
-//client.on("error", function (err) {
-//  console.log("Error " + err);
-//});
-
-
+//写入redis
+router.all("/commit",function(req,res,next){
+	var commits = JSON.stringify(req.query.data);
+	var name    = req.query.data.name;
+	redisclient.set("bidinvest",commits,redis.print);
+	redisclient.publish("chatchannel",commits);
+})
 
 //email:1254473705@qq.com author:daiyunzhou 
 module.exports = router;
