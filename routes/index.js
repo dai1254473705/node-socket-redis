@@ -32,7 +32,7 @@ router.all("/commit",function(req,res,next){
 	var commits = JSON.stringify(req.query.data);
 	var name    = req.query.data.name;
 	redisclient.set("bidinvest",commits,redis.print);
-	redisclient.publish("chatchannel",commits);
+	redisclient.publish("DIEW",commits);
 })
 
 //email:1254473705@qq.com author:daiyunzhou 

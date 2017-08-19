@@ -67,14 +67,14 @@ app.use(function(err, req, res, next) {
 
 redisclient.on('connect',function(){
  console.log("redis connect success");
- //订阅频道chatchannel
- redisclient.subscribe("chatchannel");
+ //订阅频道DIEW
+ redisclient.subscribe("DIEW");
 });
 //socketIo connection
 io.on('connection', function(socket) {
 	redisclient.on('message', function(error, msg) {
         console.log('socketIo connection');
-        socket.emit('msgReceived', msg);        
+        socket.emit('DIEWMSG', msg);        
     });
 })
 module.exports = app;

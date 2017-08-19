@@ -43,7 +43,7 @@ if (typeof jQuery === 'undefined') {
         console.log('connection setup for socket.io')
     });
     //socket 订阅的频道
-    socket.on('msgReceived', function(msg) {
+    socket.on('DIEWMSG', function(msg) {
     	var objMsg = JSON.parse(msg);
     	var random = parseInt(Math.random()*6)+1;
         //返回的数据

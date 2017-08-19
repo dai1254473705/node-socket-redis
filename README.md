@@ -1,160 +1,99 @@
-# baidupic#
-BaiduPicturesCrawl
-# 从百度获取图片地址并解析#
+# node+redis+socket demo
 
->##规则如下##
-{
-    'w': 'a',
-    'k': 'b',
-    'v': 'c',
-    '1': 'd',
-    'j': 'e',
-    'u': 'f',
-    '2': 'g',
-    'i': 'h',
-    't': 'i',
-    '3': 'j',
-    'h': 'k',
-    's': 'l',
-    '4': 'm',
-    'g': 'n',
-    '5': 'o',
-    'r': 'p',
-    'q': 'q',
-    '6': 'r',
-    'f': 's',
-    'p': 't',
-    '7': 'u',
-    'e': 'v',
-    'o': 'w',
-    '8': '1',
-    'd': '2',
-    'n': '3',
-    '9': '4',
-    'c': '5',
-    'm': '6',
-    '0': '7',
-    'b': '8',
-    'l': '9',
-    'a': '0'
+## super simple 
+
+通过node实时读取redis(本地或者远程)中改变的数据，并通过socket.io实时展示在浏览器
+（express,request-json,ejs等不懂得请查看相应的文档，此处不解释）
+## install redis
+
+[redis官网](https://redis.io "redis官网")
+[windows 64位地址](https://github.com/MSOpenTech/redis/releases "windows 64位地址")
+
+1.将zip压缩包解压，cmd进入，输入 redis-server redis.windows.conf  运行redis服务器
+2.redis 命令行工具(redis-cli)，双击打开，输入help查看指令
+3.在项目目录下安装redis (cnpm i redis --save)
+
+## config
+
+```js
+/*
+ * config
+ */
+var  options = {
+	RDS_PORT : '6379',                //端口号
+    RDS_HOST : '127.0.0.1',    //服务器IP  要连接的A服务器redis   
+    RDS_PWD  : '',  //密码   
+    RDS_OPTS : {}//设置项
 };
-##主要代码##
-$(function(){
-		var pn=30;
-		function Baidu(){};
-		Baidu.prototype.conver = function(res){
-			var _this = this;
-//			console.log(res);
-			var options  = this.convertMap;
-			var str,start,mid,mid1,mid2,end=[],resultstr;
-			var getStr  =res.objURL;
-			//把头尾截取出来
-			start  = getStr.indexOf("$");
-			//将AzdH3FAzdH3F删除
-			mid1 = getStr.substring(start+2);
-			mid2 = mid1.replace(/AzdH3F/gi,'/');
-//			mid  = mid2.replace(/_z2C$q/gi,':')
-			//等到需要转换的字符串
-			resultstr = mid2.replace(/_z&e3B/gi,'.');
-			console.log(getStr);
-			console.log(resultstr);
-			$.each(resultstr.split(''),function(index,item){
-				var setitem  = _this.convertMap[item];
-				if(setitem==undefined){
-					setitem = item;
-				}
-				end.push(setitem);
-			})
-			str = "http://"+end.join("");
-			
-			console.log(str);
-			return str;
-		};
-		Baidu.prototype.getData = function(url){
-			var _this = this;
-			var name = $(".searchText").val();
-//			console.log(name);
-            $.ajax({
-            	url:url,
-            	dataType:"json",
-            	type:"get",
-            	data:{
-            		"name":name==""?"昆虫":name,
-            		"pn":pn
-            	},
-            	success:function(data){
-            		var res = data.body;
-            		console.log(res);/**/
-            		$(".showSource").val(data.statics);
-            		var one = res.indexOf("queryExt");
-            		var two = res.indexOf("listNum");
-            		var ss = res.replace(res.slice(one,two-one),'');
-//          		console.log(one);
-//          		console.log(two);
-//          		console.log(res.slice(one-1,two-1));
-             		var gets = res.replace(res.slice(one-1,two-1),'');
-             		var jsonData = JSON.parse(gets);
-             		var hasConv = '';
-            		console.log(jsonData);
-            		$.each(jsonData.data,function(index,item){
-            			if(item.objURL!=''&&item.objURL!=undefined&&item.objURL!=null){
-	            			hasConv =  _this.conver(item);
-	            			var str  = '<li class="col-md-10 list-group-item"><img src="'+hasConv+'" class="img-thumbnail col-md-12"></li>'
-	            			$('.img').append(str);
-//	            			console.log(hasConv);
-						}
-            		})
-				},
-            	error:function(err){
-            		console.log(err);
-            	}
-            })
-		};
-		Baidu.prototype.convertMap = {
-            'w': 'a',
-            'k': 'b',
-            'v': 'c',
-            '1': 'd',
-            'j': 'e',
-            'u': 'f',
-            '2': 'g',
-            'i': 'h',
-            't': 'i',
-            '3': 'j',
-            'h': 'k',
-            's': 'l',
-            '4': 'm',
-            'g': 'n',
-            '5': 'o',
-            'r': 'p',
-            'q': 'q',
-            '6': 'r',
-            'f': 's',
-            'p': 't',
-            '7': 'u',
-            'e': 'v',
-            'o': 'w',
-            '8': '1',
-            'd': '2',
-            'n': '3',
-            '9': '4',
-            'c': '5',
-            'm': '6',
-            '0': '7',
-            'b': '8',
-            'l': '9',
-            'a': '0'
-       };
-		var bd = new Baidu();
-		$(".searchBtn").on("click",function(){
-			bd.getData('/getbaidupic');
-		})
-		$(".more").on("click",function(){
-			pn+=30;
-			bd.getData();
-		})
-		$(".local").on("click",function(){
-			bd.getData('/getbaidupic_bendi');
-		})
-	})
-  仅用来学习参考，不要做坏事，我们都是好孩子！
+
+module.exports = {
+	options:options
+}
+```
+##app.js
+
+```js
+const redis = require("redis");
+const options = require("./config");
+const redisclient = redis.createClient(options.RDS_PORT,options.RDS_HOST,options.RDS_OPTS);
+var server = require('http').Server(app);
+```
+
+##配置redis
+```js
+redisclient.on('connect',function(){
+ console.log("redis connect success");
+ //订阅频道DIEW
+ redisclient.subscribe("DIEW");
+});
+```
+当请求/commit时，将数据存在redis,并广播
+
+```js
+//写入redis
+router.all("/commit",function(req,res,next){
+	var commits = JSON.stringify(req.query.data);
+	var name    = req.query.data.name;
+	redisclient.set("bidinvest",commits,redis.print);
+	redisclient.publish("DIEW",commits);
+})
+```
+##socket.io
+[socket官网](https://socket.io "socket官网")
+利用socket.io实现保存数据到redis时，触发socket推送数据到client
+
+server：
+
+```js
+io.on('connection', function(socket) {
+	redisclient.on('message', function(error, msg) {
+        console.log('socketIo connection');
+        socket.emit('DIEWMSG', msg);        
+    });
+})
+```
+client:
+```js
+//init socket
+	var socket = io.connect('http://127.0.0.1:3000/');
+	
+	//socket connection
+    socket.on('connection', function() {
+        console.log('connection setup for socket.io')
+    });
+    //socket 订阅的频道
+    socket.on('DIEWMSG', function(msg) {
+    	var objMsg = JSON.parse(msg);
+    	var random = parseInt(Math.random()*6)+1;
+        //返回的数据
+        var html = '';
+        html+='<li class="row list-group-item"><div class="col-md-2 col-xs-12">';
+        html+='<img src="/images/avatar/avatar0'+random+'.jpg" alt="llalalalla" class="img-thumbnail text-center avatar">';
+        html+='<p class="text-center">'+objMsg.name+'</p></div>';
+        html+='<div class="col-md-10 col-xs-12">';
+        html+='<p>'+objMsg.txt+'</p></div></li>';
+        
+        $(".commit-all").append(html);
+    })
+```
+##具体请看源文件
